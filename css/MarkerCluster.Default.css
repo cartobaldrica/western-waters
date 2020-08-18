@@ -1,0 +1,60 @@
+.marker-cluster-small {
+	background-color: rgba(157, 188, 225, 0.6);
+	}
+.marker-cluster-small div {
+	background-color: rgba(118, 161, 213, 0.6);
+	}
+
+.marker-cluster-medium {
+	background-color: rgba(48, 97, 156, 0.6);
+	}
+.marker-cluster-medium div {
+	background-color: rgba(36, 72, 117, 0.6);
+	}
+
+.marker-cluster-large {
+	background-color: rgba(30, 61, 98, 0.6);
+	}
+.marker-cluster-large div {
+	background-color: rgba(18, 37, 59, 0.6);
+	}
+
+	/* IE 6-8 fallback colors */
+.leaflet-oldie .marker-cluster-small {
+	background-color: rgb(177, 205, 231);
+	}
+.leaflet-oldie .marker-cluster-small div {
+	background-color: rgb(235, 242, 249);
+	}
+
+.leaflet-oldie .marker-cluster-medium {
+	background-color: rgb(60, 130, 195);
+	}
+.leaflet-oldie .marker-cluster-medium div {
+	background-color: rgb(118, 167, 213);
+	}
+
+.leaflet-oldie .marker-cluster-large {
+	background-color: rgb(30, 65, 98);
+	}
+.leaflet-oldie .marker-cluster-large div {
+	background-color: rgb(48, 104, 156);
+}
+
+.marker-cluster {
+	background-clip: padding-box;
+	border-radius: 20px;
+	}
+.marker-cluster div {
+	width: 30px;
+	height: 30px;
+	margin-left: 5px;
+	margin-top: 5px;
+
+	text-align: center;
+	border-radius: 15px;
+	font: 12px 'Lora', serif;
+	}
+.marker-cluster span {
+	line-height: 30px;
+	}
