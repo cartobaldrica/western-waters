@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Western Waters Digital Library</title>
+
+	<link rel="shortcut icon" href="img/oregon.ico" type="image/x-icon">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin="" />    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Custom CSS -->
+    <link href="css/wwdl.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Catamaran&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Quicksand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Mukta:300,400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@200;400;700&display=swap" rel="stylesheet"> 
+
+    <!-- jQuery -->
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js" integrity="sha512-WXoSHqw/t26DszhdMhOXOkI7qCiv5QWXhH9R7CgvgZMHz1ImlkVQ3uNsiQKu5wwbbxtPzFXd1hK4tzno2VqhpA==" crossorigin=""></script>    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/papaparse@4.3.6/papaparse.min.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+
+    <script src="js/leaflet.markercluster-src.js"></script>
+    <link rel="stylesheet" href="css/MarkerCluster.css" />
+    <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+    
+
+</head>
+
+<body>
+    
+
+    <nav class="navbar navbar-expand-lg" id="nav" style="border-bottom:2px solid black;">
+        <div style="display:block; text-align:center;">
+            <a href="year_of_water.html"><img src="img/wwdl-logo.png" style="height:100px; display:inline-block; vertical-align:top;"></a>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="info-modal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <p class="modal-title" style="font-size:30px;">About</p>
+                </div>
+                <div class="modal-body">
+                    <p>The Western Waters Digital Library (WWDL) provides free public access to a wide range of significant resources on water in the Western United States. Available resources include classic water literature, legal transcripts, maps, reports, personal papers, water project records, photographs, audio recordings, videos, and other material. The WWDL also includes selected collection guides. These guides, also known as finding aids, describe a collection’s content, significance, and relevance to a particular research topic.</p>
+                    <p>The WWDL began as a collaborative regional project created by twelve research libraries from eight western states under the auspices of the Greater Western Library Alliance (GWLA). Funding for the WWDL has been provided by the National Endowment for the Humanities (NEH) and the Institute of Museum and Library Services (IMLS).</p>
+                    <p style="margin-bottom:0;">Related Databases:</p>
+                    <p style="margin-bottom:0;"><a target="_blank" href="https://tools.oregonexplorer.info/OE_HtmlViewer/Index.html?viewer=owrt">Oregon Watershed Restoration Tool</a></p>
+                    <p style="margin-bottom:0;"><a target="_blank" href="https://oregonexplorer.info/">Oregon Explorer</a></p>
+                </div>
+                <div class="modal-footer">
+                    <p>Created by Gareth Baldrica-Franklin</p>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 20px; height:100%; ">
+        <div id="searchBar" style="padding-bottom:5px;">
+            <a id="aboutClick" class="about" data-toggle="modal" data-target="#info-modal">About</a>
+            <p id="visible-projects" style="margin-bottom:0; float:right; margin-right:10px;"></p>
+            <input id="search" list="searchList" type="text" placeholder="Search the Collection..." style="margin-left:10px;">
+            <button id="advSearch" style="margin-left:5px;" onclick="advSearch()">Advanced Search</button>
+            <button id="advSearch" style="float:right;" onclick="clearSearch()">Clear Search</button>
+            <div id="advancedSearch" style="display:none; margin-bottom:5px; margin-left:10px; overflow:auto;">
+                    <div class="search-column">
+                        <input class="advSearch" type="checkbox" id="environment_check" name="environment" value="environment" onclick="themeClick('Environment','#environment_check','theme')">
+                        <label for="environment">Environment</label><br>
+                        <input class="advSearch" type="checkbox" id="health_check" name="health" value="health" onclick="themeClick('Health','#health_check','theme')">
+                        <label for="health">Health</label><br>
+                        <input class="advSearch" type="checkbox" id="safety_check" name="safety" value="safety" onclick="themeClick('Safety','#safety_check','theme')">
+                        <label for="environment">Safety</label><br>
+                        <input class="advSearch" type="checkbox" id="economy_check" name="economy" value="economy" onclick="themeClick('Economy','#economy_check','theme')">
+                        <label for="environment">Economy</label><br>
+                        <input class="advSearch" type="checkbox" id="arts_check" name="arts" value="arts" onclick="themeClick('Arts','#arts_check','theme')">
+                        <label for="arts">Arts & Culture</label><br>
+                        <input class="advSearch" type="checkbox" id="comm_check" name="tech" value="tech" onclick="themeClick('Comm','#comm_check','theme')">
+                        <label for="tech">Community</label><br>
+                        <input class="advSearch" type="checkbox" id="law_check" name="tech" value="tech" onclick="themeClick('Law','#law_check','theme')">
+                        <label for="tech">Policy & Law</label><br>
+                        <input class="advSearch" type="checkbox" id="tech_check" name="tech" value="tech" onclick="themeClick('Tech','#tech_check','theme')">
+                        <label for="tech">Tech. & Innov.</label><br>
+                    </div>
+                    <div class="search-column">
+                        <input class="advSearch" type="checkbox" id="2018_check" name="tech" value="tech" onclick="themeClick(2018,'#2018_check','date')">
+                        <label for="tech">2018</label><br>
+                        <input class="advSearch" type="checkbox" id="2019_check" name="tech" value="tech" onclick="themeClick(2019,'#2019_check','date')">
+                        <label for="tech">2019</label><br>
+                        <input class="advSearch" type="checkbox" id="2020_check" name="tech" value="tech" onclick="themeClick(2020,'#2020_check','date')">
+                        <label for="tech">2020</label><br><br>
+                    </div>
+                <button id="advSearch" style="position:absolute; left:5px; bottom:0; " onclick="advSearch()">Close</button>
+            </div>
+            <!--<button style="margin-left:5px;" onclick="reset()">Reset</button>-->
+            <!--<button onclick="search()">Search</button>-->
+            <datalist id="searchList"></datalist>
+        </div>
+        <div id="panel" class="col-xs-12 col-sm-12 col-md-3" style="padding-left: 0; z-index:1; padding-right:0; margin-top:180px;">
+            <div id="scrollbar" style="padding:10px;">
+                <div id ="overall" style="padding:5px;"></div>   
+                <div id="projects" style="margin-top:25px;"></div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-9" style="margin-bottom: 25px; height:100%; display:block; padding:0;">
+            <div id="map" style="z-index:0; ">
+                <a href="http://mapbox.com/about/maps" class='mapbox-wordmark' target="_blank">Mapbox</a>
+                <!--<button type="button" class='centerMap' onclick="addBasins()" id="borderToggle" style="bottom:80px;">Toggle Basins</button>
+                <button type="button" class='centerMap' onclick="addStates()" id="stateToggle">Toggle States</button>
+                <a href="https://inr.oregonstate.edu/"><img class="combined-logo" src="img/inr_logo.png"></a>-->
+            </div>
+        </div>
+    </div>
+
+    </div>
+    <script type="text/javascript" src="https://npmcdn.com/csv2geojson@5.1.1/csv2geojson.js"></script>
+
+    <script>
+    //////////////Reset search function on page refresh////////////
+    window.onbeforeunload = function (e) {
+        (function (global) {
+            globalSearchValue = global.localStorage.clear();
+        }(window));
+    };
+    //////////////check for search from homepage/////////////
+    var globalSearchValue;
+    
+    (function (global) {
+        globalSearchValue = global.localStorage.getItem("searchValue");
+    }(window));
+    /////Enable topojson functionality/////
+        L.TopoJSON = L.GeoJSON.extend({  
+            addData: function(jsonData) {    
+                if (jsonData.type === 'Topology') {
+                    for (key in jsonData.objects) {
+                    geojson = topojson.feature(jsonData, jsonData.objects[key]);
+                    L.GeoJSON.prototype.addData.call(this, geojson);
+                }
+            }    
+            else {
+                L.GeoJSON.prototype.addData.call(this, jsonData);
+                }
+            }  
+        });
+    /////reset inputs/////
+        $('input:checkbox').prop('checked', false);
+    /////open advanced search menu/////
+        function advSearch(){
+            var display = $('#advancedSearch').css('display');
+            if (display == "none"){
+                $('#advancedSearch').css('display','block');
+                $('#projects').css('margin-top','250px');
+            }
+            if (display == "block"){
+                $('#advancedSearch').css('display','none');
+                $('#projects').css('margin-top','25px');
+            }
+        }
+    /////clear search function////
+        function clearSearch(){
+            for (var i = 0; i < filter.length; i++){
+                filter[i].contents = [];
+            }
+            $('input').val('');
+            $('input[type=checkbox].advSearch').prop('checked', false);
+            if(searchValue)
+                searchValue = null;
+            themeClick(null,null,"search");
+
+            map.setView([37.61, -104.59], 4);
+        }
+    /////map bounds/////    
+        var southWest = L.latLng(21.172626315855425, -149.58519708215204),
+            northEast = L.latLng(66.10396253416393, -82.34035998361294),
+            bounds = L.latLngBounds(southWest, northEast);
+    /////add map/////    
+        var map = L.map('map', {center: [37.61, -104.59], zoom: 4, scrollWheelZoom:false});
+    /////tile layers/////
+    basemap = L.tileLayer('https://api.mapbox.com/styles/v1/gbaldrica/ckcnt4qyo2x9i1hpjarllokwy/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZ2JhbGRyaWNhIiwiYSI6ImNqZnlkeGtkbTRsYTEycXBvYWhvNHl6dHQifQ.gbIkzk7MVT9R9kPcPenRsA', {
+	  attribution:'© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+	  maxZoom:11,
+	  minZoom:4,
+	  opacity:1
+	}).addTo(map);
+
+    state_labels = L.tileLayer('https://api.mapbox.com/styles/v1/gbaldrica/ckcnt9eyo25hf1it9ye8x2p3a/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZ2JhbGRyaWNhIiwiYSI6ImNqZnlkeGtkbTRsYTEycXBvYWhvNHl6dHQifQ.gbIkzk7MVT9R9kPcPenRsA', {
+	  attribution:'© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+	  maxZoom:11,
+	  minZoom:4,
+	  opacity:1
+	});
+
+    total_basins = L.tileLayer('https://api.mapbox.com/styles/v1/gbaldrica/ckdt7g9nm1nnr19n5w4d7130h/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZ2JhbGRyaWNhIiwiYSI6ImNqZnlkeGtkbTRsYTEycXBvYWhvNHl6dHQifQ.gbIkzk7MVT9R9kPcPenRsA', {
+	  attribution:'© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+	  maxZoom:11,
+	  minZoom:4,
+	  opacity:1
+	});
+
+    ////static JSON layers////
+        /////cover layer/////
+        var cover = new L.TopoJSON(null, {interactive:false});
+
+        $.getJSON('assets/cover.json')
+  		    .done(addCoverData);
+
+        function addCoverData(topoData) {  
+            cover.addData(topoData);
+            cover.addTo(map);
+            cover.eachLayer(handleCover);
+        }
+
+        function handleCover(layer){
+            layer.setStyle({
+                    fillColor:'#000000',
+                    weight:0,
+                    fillOpacity:0.5,
+                });
+            }
+        /////basin layer/////
+        var basins = new L.TopoJSON(null, {interactive:false});
+
+        $.getJSON('assets/basins.json')
+  		    .done(addData);
+
+        function addData(topoData) {  
+            basins.addData(topoData);
+            basins.eachLayer(handleBasins);
+        }
+
+        function handleBasins(layer){
+            layer.setStyle({
+                    color:'#1f5d93',
+                    weight:1,
+                    opacity: 1,
+                    fillOpacity:0,
+                });
+            }
+        /////basin labels/////
+        var basinLabels = new L.TopoJSON(null, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    interactive:false,
+                }).bindTooltip(feature.properties.NAME, {className: 'label-tooltip basin', permanent:true, direction:'center'});
+            }
+        });
+        $.getJSON('assets/watershed_center.json')
+              .done(addLabelData);
+              
+        function addLabelData(topoData) {  
+            basinLabels.addData(topoData);
+            basinLabels.eachLayer(handleBasinLabel);
+        }
+
+        function handleBasinLabel(layer){
+            layer.setStyle({
+                    weight:0,
+                    opacity: 0,
+                    fillOpacity:0,
+                });
+        }
+
+        /////huc 4basin layer/////
+        var huc4basins = new L.TopoJSON(null, {interactive:false});
+
+        $.getJSON('assets/huc4_basins.json')
+            .done(addHUC4Data);
+
+        function addHUC4Data(topoData) {  
+            huc4basins.addData(topoData);
+            huc4basins.eachLayer(handleHUC4Basins);
+        }
+
+        function handleHUC4Basins(layer){
+            layer.setStyle({
+                    color:'#1f5d93',
+                    weight:1,
+                    opacity: 0,
+                    fillOpacity:0,
+                });
+            }
+        /////huc4 basin label layer/////
+        var huc4basinLabels = new L.TopoJSON(null, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    interactive:false,
+                }).bindTooltip(feature.properties.NAME, {className: 'label-tooltip basin2', permanent:true, direction:'center'});
+            }
+        });
+        $.getJSON('assets/huc4_basin_points.json')
+              .done(addHuc4LabelData);
+              
+        function addHuc4LabelData(topoData) {  
+            huc4basinLabels.addData(topoData);
+            huc4basinLabels.eachLayer(handleHuc4BasinLabel);
+        }
+
+        function handleHuc4BasinLabel(layer){
+            layer.setStyle({
+                    weight:0,
+                    opacity: 0,
+                    fillOpacity:0,
+                });
+        }
+        /////huc8basin layer/////
+        var huc8basins = new L.TopoJSON(null, {interactive:false});
+
+        $.getJSON('assets/huc8_basins.json')
+            .done(addHUC8Data);
+
+        function addHUC8Data(topoData) {  
+            huc8basins.addData(topoData);
+            huc8basins.eachLayer(handleHUC8Basins);
+        }
+
+        function handleHUC8Basins(layer){
+            layer.setStyle({
+                    color:'#1f5d93',
+                    weight:1,
+                    opacity: 0,
+                    fillOpacity:0,
+                });
+            }
+        /////huc8 basin label layer/////
+        var huc8basinLabels = new L.TopoJSON(null, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    interactive:false,
+                }).bindTooltip(feature.properties.NAME, {className: 'label-tooltip basin3', permanent:true, direction:'center'});
+            }
+        });
+        $.getJSON('assets/huc8_basin_points.json')
+              .done(addHuc8LabelData);
+              
+        function addHuc8LabelData(topoData) {  
+            huc8basinLabels.addData(topoData);
+            huc8basinLabels.eachLayer(handleHuc8BasinLabel);
+        }
+
+        function handleHuc8BasinLabel(layer){
+            layer.setStyle({
+                    weight:0,
+                    opacity: 0,
+                    fillOpacity:0,
+                });
+        }
+
+        //var basinGroup = L.layerGroup([basins, basinLabels, huc4basins, huc4basinLabels, huc8basins, huc8basinLabels]);
+
+        /////states layer/////
+        var states = new L.TopoJSON(null, {interactive:false, pane:'tilePane'});
+
+        $.getJSON('assets/states.json')
+  		    .done(addCountyData);
+
+        function addCountyData(topoData) {  
+            states.addData(topoData);
+            states.eachLayer(handleStates);
+        }
+
+        function handleStates(layer){
+            layer.setStyle({
+                    color:'#b3b3b3',
+                    weight:0.25,
+                    opacity: 1,
+                    fillOpacity:0,
+                });
+            }
+        function addStates() {
+            if ($('#stateToggle').prop( "value") == 'selected'){
+                map.removeLayer(states);
+                map.removeLayer(state_labels);
+                $('#stateToggle').prop( "value","deselected");
+            }
+            else {
+                states.addTo(map);
+                state_labels.addTo(map);
+                $('#stateToggle').prop( "value","selected");
+            }
+        } 
+        var stateGroup = L.layerGroup([states, state_labels]);
+    ////interactive layers//////
+        /////universities/////
+        var universities = new L.TopoJSON(null, {
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {}).bindPopup(feature.properties.name, {className: 'label-tooltip'});
+            }
+        });
+
+        $.getJSON('assets/GWLA_universities.json')
+              .done(addUniversityData);
+              
+        function addUniversityData(topoData) {  
+            universities.addData(topoData);
+        }
+        /////state highlight layer/////
+        var oregonStyle = {
+                fillColor: 'black',
+                weight: 0,
+                opacity: 0,
+                fillOpacity:0
+            }
+
+        var oregon = $.getJSON('assets/oregon.geojson', function(data){
+            oregon = L.geoJson(data, {
+                style: oregonStyle,
+                interactive:false,
+                onEachFeature: function(feature, featureLayer) {
+        			//featureLayer.bindTooltip("Statewide", {className: 'statewide_label', permanent:true});
+    			}
+            }).addTo(map);
+        });  
+        /////research projects/////
+        var visible_projects = 0;
+
+        var markers = L.markerClusterGroup();
+
+        if (globalSearchValue)
+            console.log("Search Successful")
+        else{
+            var theme_points = L.geoJson(null, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, {
+                            color: '#ffffff',
+                            fillColor: '#000000',
+                            radius: 5,
+                            opacity: 1,
+                            fillOpacity: 1,
+                            weight: '#000000'
+                        })//.bindPopup('<h3>' + feature.properties.title_s + '</h3><p>' + feature.properties.desc + '</p>')//<img src="img/' + feature.properties.pic + '.jpg">')
+                        .bindTooltip('<h3 style="font-size:20px;">' + feature.properties.title_s + '</h3><p>' + feature.properties.desc + '</p>');//<img src="img/' + feature.properties.pic + '.jpg">');
+                    },
+                    onEachFeature: function (feature, layer) {
+                        $("#projects").append("<a class='project' target='_blank' id='" + feature.properties.id + "' href='" + feature.properties.link + "' onmouseover='highlightProject(" + feature.properties.id + ")' ' onmouseout='resetProject(" + feature.properties.id + ")'><div class='project' style='margin-bottom:5px;'><h2 style='margin-bottom:0px; margin-top:0px; font-weight:bold; font-size:20px;'>" + feature.properties.title_s + " (" + feature.properties.date + ")</h2><h3 style='margin:0px 5px 5px 0px; font-weight:normal; font-size:18px;'>" + feature.properties.PI + "</h3><p>" + feature.properties.desc + "</p></div></a>");
+                        layer.addTo(markers);
+
+                        visible_projects++;
+                        $('#visible-projects').html("Visible Projects: " + visible_projects);
+                    }
+                });
+            
+            var runLayer = omnivore.csv('assets/scholars_archive_points.csv', null, theme_points);
+
+            map.addLayer(markers);
+        }
+    /////search updates/////        
+        $("input:text").change(function(){
+            search();
+        });
+
+        var searchValue;
+        function search(){
+            searchValue=$("input[type=text]#search").val();
+            themeClick(null,null,"search");
+        }
+        ////advanced search functions
+        var filter = [{
+            name: 'theme',
+            contents: new Array(),
+            variable: 'theme'
+        },
+        {
+            name: 'date',
+            contents: new Array(),
+            variable: 'date'
+        },
+        {
+            name: 'institution',
+            contents: new Array(),
+            variable: 'institution'
+        },
+        {
+            name: 'geo',
+            contents: new Array(),
+            variable: 'geometry'
+        }]
+
+        if (globalSearchValue){
+            $('input[type=text]#search').val(globalSearchValue);
+            search();
+        }
+        else    
+            $('input').val('');
+        
+        //////project in sidebar is hovered///////
+        function highlightProject(id){
+            var stateHighlight = false;
+
+            theme_points.eachLayer(function (layer) {  
+                if(layer.feature.properties.id == id) {    
+                    if(layer.feature.properties.geometry == 'FALSE'){
+                        $(".statewide_label").css("display","block");
+                        oregon.setStyle({fillOpacity:0.5})
+                    }
+                    layer.setStyle({fillColor :'black', radius:10, weight:2}) 
+                }
+            });
+        }
+        function resetProject(id){
+            theme_points.eachLayer(function (layer) {  
+                if(layer.feature.properties.id == id) {    
+                    layer.setStyle({fillColor :'black', radius:5, weight:1}) 
+                }
+                if(layer.feature.properties.geometry == 'FALSE'){
+                    if (oregon)
+                        oregon.setStyle({fillOpacity:0})
+                    $(".statewide_label").css("display","none");
+                }
+            });
+        }
+        /////advanced search filter function/////
+        function themeClick(theme, check_ID, filter_type){
+
+            var filter_holder;
+
+            visible_projects = 0;
+            //select filter type
+            for (var i = 0; i < filter.length; i++){
+                if (filter_type == filter[i].name){
+                    if ($(check_ID).prop("checked")){
+                        filter[i].contents.push(theme.toString());
+                    }
+                    else{
+                        var ind; 
+                        for (var j = 0; j < filter[i].contents.length; j++){
+                            if (filter[i].contents[j] == theme){
+                                ind = j;
+                            }
+                        }
+                        filter[i].contents.splice(ind.toString(),1);
+                    }
+                }         
+            }
+            
+            $("#projects").empty();
+
+            map.removeLayer(markers);
+            markers = null;
+            markers = L.markerClusterGroup();
+
+            theme_points = L.geoJson(null, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        color: '#ffffff',
+                        fillColor: '#000000',
+                        radius: 5,
+                        opacity: 1,
+                        fillOpacity: 1,
+                        weight: 1
+                    })
+                    .bindTooltip('<h3 style="font-size:20px;">' + feature.properties.title_s + '</h3><p>' + feature.properties.desc + '</p>');
+                },
+                filter:function(feature,layer){
+                        var filter_list = [],
+                            props;
+
+                        for (var i = 0; i < filter.length; i++){
+                            if (filter[i].contents && filter[i].contents.length > 0){
+                                var isFalse = 0;
+                                for (var j = 0; j < filter[i].contents.length; j++){
+                                    if (feature.properties[filter[i].variable].toLowerCase().includes(filter[i].contents[j].toLowerCase()))
+                                        filter_list.push(true);
+                                    else 
+                                        isFalse++
+                                }
+                                if (isFalse >= filter[i].contents.length)
+                                    filter_list.push(false);                                
+                            }
+                        }
+                        if (searchValue){
+                            if (feature.properties.title_s.toLowerCase().includes(searchValue.toLowerCase()) == true || feature.properties.PI.toLowerCase().includes(searchValue.toLowerCase()) == true || feature.properties.institution.toLowerCase().includes(searchValue.toLowerCase()) == true || feature.properties.institution_full.toLowerCase().includes(searchValue.toLowerCase()) == true || feature.properties.state.toLowerCase().includes(searchValue.toLowerCase()) == true) 
+                                filter_list.push(true);
+                            else
+                                filter_list.push(false);
+
+                            console.log(filter_list);
+                        }
+
+                        if ($.inArray(false, filter_list) == -1){
+                            visible_projects++;
+                            $('#visible-projects').html("Visible Projects: " + visible_projects);
+                            
+                            $("#projects").append("<a class='project' target='_blank' id='" + feature.properties.id + "' href='" + feature.properties.link + "' onmouseover='highlightProject(" + feature.properties.id + ")' ' onmouseout='resetProject(" + feature.properties.id + ")'><div class='project' style='margin-bottom:5px;'><h2 style='margin-bottom:0px; margin-top:0px; font-weight:bold; font-size:20px;'>" + feature.properties.title_s + "</h2><h3 style='margin:0px 5px 5px 0px; font-weight:normal; font-size:18px;'>" + feature.properties.PI + "</h3></div></a>");
+                            return true;       
+                        }
+                    },
+                onEachFeature: function (feature, layer) {
+                    layer.addTo(markers);
+                }
+            });
+
+                runLayer = omnivore.csv('assets/scholars_archive_points.csv', null, theme_points);
+                markers.addTo(map);
+
+                resizeMap();
+
+        }
+    /////populating search autofill/////
+        var dataTable = {};
+
+        function doStuff(data) {
+            for (var i = 0;i in data;i++){
+                $("#searchList").append($("<option>").attr('value', data[i].title_s));
+                $("#searchList").append($("<option>").attr('value', data[i].PI));
+                $("#searchList").append($("<option>").attr('value', data[i].co_PIs));
+            }
+        }
+
+        function parseData(url, callBack) {
+            Papa.parse(url, {
+                download: true,
+                header:true,
+                dynamicTyping: true,
+                complete: function(results) {
+                    callBack(results.data);
+                }
+            });
+        }
+
+        parseData("assets/scholars_archive_points.csv", doStuff); 
+
+    /////determine how many projects are in the map view/////
+        map.on('zoomend', getFeaturesInView);
+        map.on('dragend', getFeaturesInView);
+
+        function getFeaturesInView() {
+            visible_projects = 0;
+            
+            $("#projects").empty();
+
+            var features = [];
+            theme_points.eachLayer(function(l){
+                if(map.getBounds().contains(l.getLatLng())){
+                    $("#projects").append("<a class='project' target='_blank' id='" + l.feature.properties.id + "' href='" + l.feature.properties.link + "' onmouseover='highlightProject(" + l.feature.properties.id + ")' ' onmouseout='resetProject(" + l.feature.properties.id + ")'><div class='project' style='margin-bottom:5px;'><h2 style='margin-bottom:0px; margin-top:0px; font-weight:bold; font-size:20px;'>" + l.feature.properties.title_s + "</h2><h3 style='margin:0px 5px 5px 0px; font-weight:normal; font-size:18px;'>" + l.feature.properties.PI + "</h3></div></a>");
+                
+                    visible_projects++;
+                    $('#visible-projects').html("Visible Projects: " + visible_projects);
+                }
+                else if (l.feature.properties.geometry == 'FALSE' && map.getZoom() == 7){
+                    $("#projects").append("<a class='project' target='_blank' id='" + l.feature.properties.id + "' href='" + l.feature.properties.link + "' onmouseover='highlightProject(" + l.feature.properties.id + ")' ' onmouseout='resetProject(" + l.feature.properties.id + ")'><div class='project' style='margin-bottom:5px;'><h2 style='margin-bottom:0px; margin-top:0px; font-weight:bold; font-size:20px;'>" + l.feature.properties.title_s + "</h2><h3 style='margin:0px 5px 5px 0px; font-weight:normal; font-size:18px;'>" + l.feature.properties.PI + "</h3></div></a>");
+                    
+                    visible_projects++;
+                    $('#visible-projects').html("Visible Projects: " + visible_projects);
+                }
+            });
+        }
+    /////update display when browser is resized/////    
+        function resizeMap(){
+            if ($(window).width() <= 992){
+                if ($("#scrollbar").height() > $("#panel").height()){
+                    var h = $("#scrollbar").height() - $("#panel").height() + 20;
+                    $("#map").css("top",h + "px");
+                }
+                else{
+                    var h = $("#projects").height() + 200;
+                    $("#map").css("top", h + "px");
+                }
+            }
+            else{
+                $("#map").css("top","120px");
+            }
+
+            var w = $(document).width();
+            var nav_w = $("#year-of-water-image").width() + $("#mainTitle").width();
+            
+            if (500 > w)
+               $("#year-of-water-image").css("display","none")
+            else
+                $("#year-of-water-image").css("display","inline-block")
+        }
+    ////show popup when page is loaded/////
+        function showPopup(){
+            $('#aboutClick').click();
+        }
+    ////////change basin label size on zoom////////
+        map.on('zoomend', function() {
+            //labelSize();
+        });
+
+        function labelSize(){
+            var currZoom = map.getZoom();
+
+            if (currZoom > 8){
+                basins.setStyle({
+                    opacity:0
+                });
+                huc4basins.setStyle({
+                    opacity:0
+                });
+                huc8basins.setStyle({
+                    opacity:1
+                });
+                $(".basin").css("visibility","hidden");
+                $(".basin2").css("visibility","hidden");
+                $(".basin3").css("visibility","visible");
+            }
+            if (currZoom >= 7 && currZoom <= 8){
+                basins.setStyle({
+                    opacity:0
+                });
+                huc4basins.setStyle({
+                    opacity:1
+                });
+                huc8basins.setStyle({
+                    opacity:0
+                });
+                $(".basin").css("visibility","hidden");
+                $(".basin2").css("visibility","visible");
+                $(".basin3").css("visibility","hidden");
+            }
+            if (currZoom < 7){
+                basins.setStyle({
+                    opacity:1
+                });
+                huc4basins.setStyle({
+                    opacity:0
+                });
+                huc8basins.setStyle({
+                    opacity:0
+                });
+                $(".basin").css("visibility","visible");
+                $(".basin2").css("visibility","hidden");
+                $(".basin3").css("visibility","hidden");
+            }
+
+            return currZoom <= 5 ? $('.label-tooltip').css("font-size","10px"):
+                $('.label-tooltip').css("font-size","18px");
+        }
+
+        var toggleLayers = {
+            "Basins": total_basins,
+            "States": stateGroup,
+            "GWLA Universities": universities,
+        };
+
+        L.control.layers(null,toggleLayers).addTo(map);
+
+        $(document).ready(resizeMap);
+        $(document).ready(labelSize);
+        //$(document).ready(showPopup);
+        $(window).resize(resizeMap);
+	
+    </script>
+
+</body>
+
+</html>

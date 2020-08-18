@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Western Waters Digital Library</title>
+
+	<link rel="shortcut icon" href="img/oregon.ico" type="image/x-icon">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin="" />    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+
+    <!-- Custom CSS -->
+    <link href="css/wwdl.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Catamaran&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Quicksand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Mukta:300,400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@200;400;700&display=swap" rel="stylesheet"> 
+
+    <!-- jQuery -->
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js" integrity="sha512-WXoSHqw/t26DszhdMhOXOkI7qCiv5QWXhH9R7CgvgZMHz1ImlkVQ3uNsiQKu5wwbbxtPzFXd1hK4tzno2VqhpA==" crossorigin=""></script>    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/papaparse@4.3.6/papaparse.min.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+
+    <script src="js/leaflet.markercluster-src.js"></script>
+    <link rel="stylesheet" href="css/MarkerCluster.css" />
+    <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+    
+
+</head>
+
+<body>
+
+        <div id="background"></div>
+        <div id="container">
+            <div id="logo">
+                <div id="front-center">
+                    <img src="img/wwdl-logo.png" id="front-logo" ><br/>
+                    <input class="main-page-search" id="search" list="searchList" type="text"  autocomplete="false"  placeholder="Search the Collection..." style="width:50%;">
+                    <button id="search-button">Search</button><br/>
+                    <button id="dataLink" href="wwdl_database.html">View the Database</button>
+                </div>
+            </div>  
+        </div>
+    
+    <script>
+        
+        $('input').val('');
+
+        (function (global) {
+            document.getElementById("search-button").addEventListener("click", function () {
+                var searchValue=$("input[type=text]#search").val();
+                
+                global.localStorage.setItem("searchValue", searchValue);
+
+                window.open("wwdl_database.html","_self");
+            }, false);
+            document.getElementById("dataLink").addEventListener("click", function () {
+                window.open("wwdl_database.html","_self");
+            }, false);
+        }(window));
+
+    </script>
+
+</body>
+
+</html>
